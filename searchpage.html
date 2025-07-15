@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Soundbaren</title>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen flex justify-center">
+  <!-- 🌍 GLOBAL CONTAINER for all spacing + max-width -->
+  <div class="w-full max-w-xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+   <!-- Header -->
+    <header class="text-center">
+      <h1 class="text-4xl font-bold">Sound bar control center</h1>
+    </header>
+
+    <!-- Top Navigation Buttons -->
+    <div class="grid grid-cols-3 gap-4">
+      <a href="/search" class="w-full block bg-green-700 text-white text-lg font-semibold rounded-lg py-4 text-center hover:bg-green-800 transition">Search</a>
+      <a href="/home" class="w-full block bg-purple-700 text-white text-lg font-semibold rounded-lg py-4 text-center hover:bg-purple-800 transition">Home</a>
+      <a href="/queue" class="w-full block bg-red-700 text-white text-lg font-semibold rounded-lg py-4 text-center hover:bg-red-800 transition">Queue</a>
+    </div>
+
+
+    <!-- Search input + dropdown + button wrapped in one form -->
+<form action="/search" method="GET" class="w-full space-y-4">
+
+  <!-- Row with input and submit button -->
+  <div class="flex gap-4 w-full">
+    <input
+      type="search"
+      id="search"
+      name="search_term"
+      class="flex-grow w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      placeholder="Search"
+      required
+    />
+    <button
+      type="submit"
+      class="flex-shrink-0 text-white bg-blue-900 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-900 font-medium rounded-lg text-sm px-6 py-4">
+      Search
+    </button>
+  </div>
+
+  <!-- Row with title and dropdown filter -->
+  <div class="flex items-center justify-between">
+    <div class="text-white text-lg font-bold">Search results:</div>
+    <select
+      name="filter"
+      class="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
+    >
+      <option value="songs">Songs</option>
+      <option value="playlists">Playlists</option>
+      <option value="artists">Artists</option>
+      <option value="albums">Albums</option>
+    </select>
+  </div>
+
+</form>
+
+
+<!-- Search results grid -->
+<div class="space-y-4">
+  {% for item in query_results%}
+  <form action = "/search/play" method="GET">
+  <input type="hidden" name="videoId" value="{{ item.videoId }}">
+  <input type="hidden" name="isPlaylist" value="{{ item.isPlaylist }}">
+  
+  <div class="w-full grid grid-cols-[1fr_auto] bg-gray-800 hover:bg-gray-700 rounded-lg overflow-hidden">
+    
+    <!-- Row Button Content (Left side) -->
+    <button type="submit"
+      class="flex items-center w-full text-left px-4 py-3 gap-4 transition-all duration-200">
+      
+      <!-- Thumbnail -->
+      <img src="{{ item.thumbnail }}" alt="Thumbnail"
+           class="w-12 h-12 rounded-md object-cover flex-shrink-0" />
+      
+      <!-- Name + Title -->
+      <div class="flex flex-col min-w-0">
+        <span class="text-white font-semibold text-lg truncate">{{ item.title }}</span>
+        <span class="text-sm text-gray-300 truncate">{{ item.artist }}</span>
+      </div>
+    </button>
+  </form>
+  </div> 
+  {% endfor %}
+</div>
+
+
+
+  </div> <!-- 🌍 end global container -->
+</body>
+</html>

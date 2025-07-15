@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <title>Soundbaren</title>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen flex justify-center">
+  <!-- 🌍 GLOBAL CONTAINER for all spacing + max-width -->
+  <div class="w-full max-w-xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+   <!-- Header -->
+    <header class="text-center">
+      <h1 class="text-4xl font-bold">Sound bar control center</h1>
+    </header>
+
+    <!-- Top Navigation Buttons -->
+    <div class="grid grid-cols-3 gap-4">
+      <a href="/search" class="w-full block bg-green-700 text-white text-lg font-semibold rounded-lg py-4 text-center hover:bg-green-800 transition">Search</a>
+      <a href="/home" class="w-full block bg-purple-700 text-white text-lg font-semibold rounded-lg py-4 text-center hover:bg-purple-800 transition">Home</a>
+      <a href="/queue" class="w-full block bg-red-700 text-white text-lg font-semibold rounded-lg py-4 text-center hover:bg-red-800 transition">Queue</a>
+    </div>
+
+    <!-- Search results header -->
+    <div class="text-center text-lg font-bold py-2 px-4 rounded">
+      Queue
+    </div>
+
+    <!-- Search results grid -->
+
+
+<!-- inside queue.html -->
+<div class="space-y-4">
+  {% for item in queue_items %}
+  <div class="w-full grid grid-cols-[1fr_auto_auto] bg-gray-800 hover:bg-gray-700 rounded-lg overflow-hidden">
+    
+    <!-- Thumbnail + Name + Title -->
+    <div class="flex items-center w-full text-left px-4 py-3 gap-4">
+      <img src="{{ item.thumbnail }}" alt="Thumbnail"
+           class="w-12 h-12 rounded-md object-cover flex-shrink-0" />
+      <div class="flex flex-col min-w-0">
+        <span class="text-white font-semibold text-lg truncate">{{ item.title }}</span>
+        <span class="text-sm text-gray-300 truncate">{{ item.artist }}</span>
+      </div>
+    </div>
+
+
+  </div>
+  {% endfor %}
+</div>
+
+  </div>
+
+
+
+  </div> <!-- 🌍 end global container -->
+</body>
+</html>
