@@ -5,6 +5,7 @@ from threading import Lock
 from time import time
 import json
 import os
+from random import random
 
 lock = Lock()
 
@@ -38,7 +39,7 @@ def read_data() -> dict:
    
 
 def ytmd_load():
-    ytmd = YTMD("touchportalytmd", "TouchPortalYTMD", "1.0.0")
+    ytmd = YTMD("touchportalytmdd", "TouchPortalYTMDD", "1.0.0")
   
     with open("token.txt", "r") as file:
         key = file.read()
@@ -51,10 +52,14 @@ def ytmd_load():
         ytmd.update_token(key) # if you already have a token key you can set it like this
     return ytmd
 
+def ytmd_initialize_data(ytmd: YTMD):
+    with lock:
+        with open("song_data.json", "w") as file:
+            json.dump(ytmd.get_state().json(), file, indent=4)
+
 def ytmd_connect_socket():
     ytmd = ytmd_load()
-    with open("song_data.json", "w") as file:
-        json.dump(ytmd.get_state().json(), file, indent=4)
+    ytmd_initialize_data(ytmd)
     ytmd.register_event(Events.state_update, on_update)
     ytmd.connect()
     sleep(0.5) # give a second for the api to catch up
@@ -72,6 +77,7 @@ def safe_read_data():
         timeout_delay = timeout_message[delay_number_char_index]
         timeout_delay = int(timeout_delay)
         sleep(timeout_delay+1) # add a second to account for rounding. might be .5 but erring on the side of caution.
+        ytmd_initialize_data(ytmd_load())
         data = read_data()   
         
     return data
