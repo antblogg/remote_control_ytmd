@@ -24,12 +24,12 @@
 
 <body class="bg-gray-900 text-white min-h-screen flex justify-center">
   <!-- 🌍 GLOBAL CONTAINER for all spacing + max-width -->
-  <div class="w-full max-w-xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+  <div class="w-full max-w-xl px-4 sm:px-6 lg:px-8 py-2 space-y-2">
 
     <!-- Header -->
-    <header class="text-center">
-      <h1 class="text-4xl font-bold">Sound bar control center</h1>
-    </header>
+<header class="text-center">
+  <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold">Sound bar control center</h1>
+</header>
 
     <!-- Top Navigation Buttons -->
     <div class="grid grid-cols-3 gap-4">
@@ -39,15 +39,15 @@
     </div>
 
     <!-- Album Cover -->
-    <div class="flex justify-center">
+    <div class="flex justify-center py-1">
       <img id = "album_cover" src=" {{ song.thumbnail }}"
            alt="Album Cover"
-           class="w-96 h-96 rounded-xl object-cover shadow-2xl" />
+           class="w-60 h-60 rounded-xl object-cover shadow-2xl" />
     </div>
   
   
 <!-- song metadata -->
-<div class="flex justify-between items-center px-4 py-2 ">
+<div class="flex justify-between items-center px-4 py-1 ">
   <span id="song_title" class="text-white text-lg font-semibold truncate">
     {{ song.title }}
   </span>
@@ -57,13 +57,12 @@
 </div>
 
     <!-- 🔘 Progress Slider -->
-
 <div class="w-full px-4">
   <input id = "progress_bar" type="range" min="0" max="1" value="0" disabled
          class="w-full h-2 bg-gray-700 rounded-lg appearance-none caccent-blue-500">
   <div class="flex justify-between text-xs text-gray-400 mt-1 px-1">
-    <span id ="progress_bar_current_duration"></span>
-    <span id = "progress_bar_song_length"></span>
+    <span id ="progress_bar_current_duration"> z</span>
+    <span id = "progress_bar_song_length"> </span>
   </div>
 </div>
 
@@ -103,7 +102,7 @@
 
 
     <!-- Bottom Controls -->
-    <div class="flex items-center justify-between space-x-4 mt-4">
+    <div class="flex items-center justify-between space-x-0 mt-0 w-auto">
 
       <!-- Repeat -->
       <form action = "/home/repeat" method="GET">
