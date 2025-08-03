@@ -13,7 +13,7 @@ def get_song_data(song, isplaylist):
 
 def get_songs(query):
     music = YTMusic()
-    songs = music.search(query=query, filter="songs", limit=5)[:6]
+    songs = music.search(query=query, filter="songs")
     out = list()
     for song in songs:
         out.append(get_song_data(song, isplaylist=False))
@@ -21,7 +21,7 @@ def get_songs(query):
 
 def get_playlist(query):
     music = YTMusic()
-    playlists = music.search(query=query, filter="playlists", limit=5)[:6]
+    playlists = music.search(query=query, filter="playlists")
     out = list()
     for playlist in  playlists:
         play_id = music.get_playlist(playlistId=playlist["browseId"],limit=1)["id"]
@@ -37,7 +37,7 @@ def get_playlist(query):
 
 def get_album(query):
     music = YTMusic()
-    albums = music.search(query=query, filter="albums", limit=5)[:6]
+    albums = music.search(query=query, filter="albums")
     out = list()
     for album in  albums:
         out.append({
