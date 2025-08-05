@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-from search_engine import get_search_results
-from video_player import play_media
-import api_interface
+from scripts.search_engine import get_search_results
+from scripts.video_player import play_media
+import scripts.api_interface as api_interface
+import scripts.playlist_manager as playlist_manager
 
 
 app = Flask(__name__)
@@ -67,8 +68,21 @@ def queuepage():
     queue = api_interface.get_queue()
     return render_template("queuepage.html", queue_items = queue)
 
+@app.route("/queue_mode")
+def queue_mode_page():
+    link = playlist_manager.get_playlist_link()
+    return render_template("queue_mode_page.html", playlist_url = link)
 
+@app.route("/queue_mode/start")
+def start_queue_list():
+    playlist_manager.start_playlist()
+    return redirect(url_for("homepage"))
   
+@app.route("/queue_mode/restart")
+def restart_queue():
+    playlist_manager.restart_playlist()
+    return redirect(url_for("queue_mode_page"))
+
 
 @app.route("/") 
 def index():

@@ -9,29 +9,23 @@ from random import random
 
 lock = Lock()
 
-def get_prev_song():
-    with open("prev_song_id.txt", "r") as file:
-        return file.read()
-
-def update_prev_song(title):
-    with open("prev_song_id.txt", "w") as file:
-        file.write(title)
+def get_lock():
+    return lock
 
 
 def on_update(data):
     try: 
         with lock:
-            with open("song_data_temp.json","w") as file:
+            with open("temp/song_data_temp.json","w") as file:
                 json.dump(data, file, indent=4)
-        
-            os.replace("song_data_temp.json", "song_data.json")
+            os.replace("temp/song_data_temp.json", "temp/song_data.json")
     except (PermissionError, FileNotFoundError):
             pass
 
 
 def read_data() -> dict:
     with lock:
-        with open("song_data.json","r") as file:
+        with open("temp/song_data.json","r") as file:
             try:
                 return json.load(file)
             except json.JSONDecodeError:
@@ -39,22 +33,24 @@ def read_data() -> dict:
    
 
 def ytmd_load():
-    ytmd = YTMD("touchportalytmdd", "TouchPortalYTMDD", "1.0.0")
+    ytmd = YTMD("soundbarcontroller", "SoundbarController", "1.0.0")
   
-    with open("token.txt", "r") as file:
-        key = file.read()
-    if key == "":
+    with open("data/credentials.json", "r") as file:
+        data = json.load(file)
+        key = data["ytmd_token"] 
+    if key == "insert token here":
         print("no token, autheniticate")
         key = ytmd.authenticate() # get token key and sets it at same time
-        with open("token.txt", "w") as file:
-            file.write(key)
+        data.update({"ytmd_token": key})
+        with open("data/credentials.json", "w") as file:
+            json.dump(data, file, indent=4)
     else:
         ytmd.update_token(key) # if you already have a token key you can set it like this
     return ytmd
 
 def ytmd_initialize_data(ytmd: YTMD):
     with lock:
-        with open("song_data.json", "w") as file:
+        with open("temp/song_data.json", "w") as file:
             json.dump(ytmd.get_state().json(), file, indent=4)
 
 def ytmd_connect_socket():
@@ -85,6 +81,7 @@ def safe_read_data():
 
 def load_song_metadata():
     data = safe_read_data()         
+    data = dict(data)
     parser = Parser(data)
     song_data = parser.video_state
     artist = song_data.author
@@ -114,14 +111,21 @@ def toggle_loop():
     
 def get_queue():
     data = safe_read_data()
-    queue = data["player"]["queue"]
+    try:
+        queue = data["player"]["queue"]
+    except KeyError:
+        return list()
     start_index = queue["selectedItemIndex"]
     items = queue["items"]
     end_index = len(items)
-
     out = list()
+    if data["video"]["author"]== "null":
+        return out
     for i in range(start_index, end_index):
-        item = items[i]
+        try:
+            item = items[i]
+        except IndexError:
+            break
         if isinstance(item["thumbnails"], list):
             thumbnail = item["thumbnails"][0]["url"]  #select largest thumbnail
         else:

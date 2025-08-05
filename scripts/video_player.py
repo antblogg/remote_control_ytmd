@@ -1,4 +1,4 @@
-from api_interface import ytmd_load
+from scripts.api_interface import ytmd_load
 from ytmd_sdk import YTMD
 from flask import request
 

@@ -24,11 +24,17 @@
       <a href="/queue" class="w-full block bg-red-700 text-white text-lg font-semibold rounded-lg py-4 text-center hover:bg-red-800 transition">Queue</a>
     </div>
 
-    <!-- Search results header -->
-    <div class="text-center text-lg font-bold py-2 px-4 rounded">
-      Queue
-    </div>
+  <!-- Search results header -->
+  <div class="flex items-center justify-between text-lg font-bold py-2 px-4 rounded">
+    <span>Queue</span>
+    <form action="/queue_mode" method="GET">
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        Open queue        
+      </button>
+    </form>
+  </div>
 
+    
     <!-- Search results grid -->
 
 

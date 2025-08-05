@@ -1,0 +1,4 @@
+Flask==3.1.1
+ytmd-sdk==1.0.1
+ytmusicapi==1.11.0
+segno==1.6.6

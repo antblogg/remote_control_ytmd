@@ -1,6 +1,8 @@
 from flask import request
-from ytmusicapi import YTMusic
-
+from random import randint
+from ytmusicapi import YTMusic, OAuthCredentials
+from ytmusicapi.exceptions import YTMusicServerError
+import json
 
 def get_song_data(song, isplaylist):
     return {
@@ -79,5 +81,64 @@ def get_search_results():
             return list()
      
 
+def get_oauth_support_credentials():
+    with open("data/credentials.json","r") as file:
+        data = json.load(file)["oauth"]
+        client = data["client_id"]
+        secret = data["client_secret"]
+        return (client, secret)
+        
+
+def generate_title():
+    length = 15
+    basechar = ord("a")
+    out = str()
+    for _ in range(length):
+        charoffset = randint(0,25) 
+        is_uppercase = randint(0,1)
+        char: str = str(chr(basechar+charoffset))
+        out += char.upper() if is_uppercase else char
+    return out
+
+
+def get_queue_playlist_id():
+    with open("temp/queue_playlist_id.txt","r") as file:
+        return file.read()
+
+def save_queue_playlist_id(id):
+    with open("temp/queue_playlist_id.txt","w") as file:
+        file.write(id)
+
+
+def get_queue_playlist_link():
+    prefix = "https://music.youtube.com/playlist?list="
+    playlist_id = get_queue_playlist_id()
+    return prefix+playlist_id
+    
+def delete_old_playlist(ytmusic: YTMusic):
+    id = get_queue_playlist_id()
+    if not id == '':
+        try:
+            ytmusic.delete_playlist(id)
+        except YTMusicServerError:
+            return
+
+def generate_authenticated_ytmusic():
+    client, secret = get_oauth_support_credentials()
+    credentials = OAuthCredentials(client_id=client, client_secret=secret)
+    return YTMusic(auth="data/oauth.json", oauth_credentials=credentials)
+
+
+def create_new_queue_playlist():
+    ytmusic = generate_authenticated_ytmusic()
+    delete_old_playlist(ytmusic)
+    new_playlist_id = ytmusic.create_playlist(title=generate_title(), description="auto generated queue playlist", privacy_status="UNLISTED")
+    save_queue_playlist_id(new_playlist_id)
+
+
+
+
 if __name__=="__main__":
+    delete_old_playlist(generate_authenticated_ytmusic())
+    print(generate_title())
     pass
