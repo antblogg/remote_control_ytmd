@@ -7,15 +7,32 @@ import json
 import os
 from random import random
 
+import scripts.search_engine as search_engine
+import scripts.video_player as video_player
+
 lock = Lock()
 
 def get_lock():
-    return lock
-
+    return Lock
 
 def on_update(data):
+    if not hasattr(on_update,"prev_song_id"):
+        on_update.prev_song_id = "none"
+        on_update.prev_time = time()
+
     try: 
         with lock:
+            current_id = data.get("video","{}").get("id","") 
+            if current_id != on_update.prev_song_id: 
+                elapsed = time()-on_update.prev_time
+                cooldown = 3 # the minimum time between updates
+                if elapsed > cooldown:
+                    on_update.prev_song_id = current_id
+                    on_update.prev_time = time()
+                    playlist_id = data.get("playlistId")
+                    if playlist_id == search_engine.get_queue_playlist_id():
+                        video_player.refresh_player(current_id,playlist_id)
+
             with open("temp/song_data_temp.json","w") as file:
                 json.dump(data, file, indent=4)
             os.replace("temp/song_data_temp.json", "temp/song_data.json")

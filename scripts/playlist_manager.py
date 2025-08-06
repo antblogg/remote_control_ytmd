@@ -1,6 +1,6 @@
-import scripts.api_interface as api_interface 
 import scripts.search_engine as search_engine
 import scripts.video_player as video_player
+import scripts.api_interface as api_interface 
 import segno
 
 
@@ -13,6 +13,7 @@ def get_playlist_link():
     update_qr_code(link)
     return link
 
+
 def start_playlist():
     link = search_engine.get_queue_playlist_id()
     ytmd = api_interface.ytmd_load()
@@ -20,6 +21,7 @@ def start_playlist():
 
 def restart_playlist():
     search_engine.create_new_queue_playlist()
+
 
 
 
