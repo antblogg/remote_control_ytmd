@@ -4,7 +4,6 @@ from ytmusicapi import YTMusic, OAuthCredentials
 from ytmusicapi.exceptions import YTMusicServerError
 import json
 
-import scripts.search_engine as search_engine
 def get_song_data(song, isplaylist):
     return {
             "title": song["title"],
@@ -67,7 +66,6 @@ def get_artist_songs(artist_name):
 def get_search_results():
     query = request.args.get("search_term")
     filter = request.args.get("filter")
-
  
     match filter:
         case "artists":
@@ -81,6 +79,13 @@ def get_search_results():
         case _:
             return list()
      
+def get_truncated_search_results():
+    truncate_index = 30
+    songs = get_search_results()
+    for song in songs:
+        song["title"] = song["title"][:truncate_index]
+        song["artist"] = song["artist"][:truncate_index]
+    return songs
 
 def get_oauth_support_credentials():
     with open("data/credentials.json","r") as file:

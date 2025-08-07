@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-from scripts.search_engine import get_search_results
+from scripts.search_engine import get_truncated_search_results
 from scripts.video_player import play_media
 import scripts.api_interface as api_interface
 import scripts.playlist_manager as playlist_manager
@@ -10,7 +10,7 @@ ytmd = api_interface.ytmd_connect_socket()
 
 @app.route("/search")
 def searchpage():
-    query_results = get_search_results() 
+    query_results = get_truncated_search_results() 
     return render_template("searchpage.html", query_results = query_results)
 
 @app.route("/search/play")
@@ -18,7 +18,6 @@ def play_new_song():
     play_media()
     return redirect(url_for("homepage"))
     
-
 @app.route("/home")
 def homepage():
     songdata = api_interface.load_song_metadata()
@@ -83,6 +82,10 @@ def restart_queue():
     playlist_manager.restart_playlist()
     return redirect(url_for("queue_mode_page"))
 
+@app.route("/queue_mode/add")
+def add_to_queue():
+    playlist_manager.add_to_queue()
+    return redirect(url_for("searchpage"))
 
 @app.route("/") 
 def index():

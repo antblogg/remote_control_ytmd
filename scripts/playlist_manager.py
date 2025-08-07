@@ -2,6 +2,7 @@ import scripts.search_engine as search_engine
 import scripts.video_player as video_player
 import scripts.api_interface as api_interface 
 import segno
+from flask import request
 
 
 def update_qr_code(link):
@@ -22,6 +23,18 @@ def start_playlist():
 def restart_playlist():
     search_engine.create_new_queue_playlist()
 
+
+
+def add_to_queue():
+    ytmusic = search_engine.generate_authenticated_ytmusic()
+    queueid = search_engine.get_queue_playlist_id()
+    video_id = request.args.get("videoId")
+    print(queueid)
+    print(video_id)
+    ytmusic.add_playlist_items(playlistId=queueid,videoIds=[video_id])
+        
+
+    
 
 
 
