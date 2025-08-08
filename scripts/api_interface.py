@@ -15,28 +15,34 @@ lock = Lock()
 def get_lock():
     return Lock
 
+
 def on_update(data):
-    if not hasattr(on_update,"prev_song_id"):
-        on_update.prev_song_id = "none"
-        on_update.prev_time = time()
+    if not data:
+        return
 
-    try: 
-        with lock:
-            current_id = data.get("video","{}").get("id","") 
-            if current_id != on_update.prev_song_id: 
-                elapsed = time()-on_update.prev_time
-                cooldown = 3 # the minimum time between updates
-                if elapsed > cooldown:
-                    on_update.prev_song_id = current_id
-                    on_update.prev_time = time()
-                    playlist_id = data.get("playlistId")
-                    if playlist_id == search_engine.get_queue_playlist_id():
-                        video_player.refresh_player(current_id,playlist_id)
+    with lock:
+        playlist_id = data["playlistId"]
+        if playlist_id == search_engine.get_queue_playlist_id():
+            current_song_data =data["video"] 
+            playlist_data = data["player"]
 
+            song_duration = int(current_song_data["durationSeconds"])
+            song_progress = int(playlist_data["videoProgress"])
+            time_remaining = song_duration-song_progress
+
+            skip_threshold_time = 3
+            if time_remaining < skip_threshold_time:
+                queue = playlist_data["queue"]
+                queue_elements = queue["items"] 
+                selected_index = int(queue["selectedItemIndex"])
+                target_song = queue_elements[selected_index+1]
+                target_song_id = target_song["videoId"]
+                video_player.refresh_player(target_song_id,playlist_id)
+        try: 
             with open("temp/song_data_temp.json","w") as file:
                 json.dump(data, file, indent=4)
             os.replace("temp/song_data_temp.json", "temp/song_data.json")
-    except (PermissionError, FileNotFoundError):
+        except (PermissionError, FileNotFoundError):
             pass
 
 
