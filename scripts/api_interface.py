@@ -15,10 +15,11 @@ skip_debounce_lock = Lock()
 
 
 def relock_debounce_lock_after_timeout():
-    timeout = 5
+    timeout = 15
     sleep(timeout)
     if skip_debounce_lock.locked():
         skip_debounce_lock.release()
+        print("reset")
             
 def get_lock():
     return lock
@@ -36,12 +37,11 @@ def get_next_song_id(selected_song_id, playlist_id):
 def check_queue_refresh(data: dict):
     if not data:
         return
+    if skip_debounce_lock.locked():
+        return
+    skip_debounce_lock.acquire()
     playlist_id = data["playlistId"]
     if not playlist_id == search_engine.get_queue_playlist_id():
-        return
-
-    if skip_debounce_lock.locked():
-        print("skipped")
         return
 
     current_song_data = data["video"] 
@@ -54,7 +54,6 @@ def check_queue_refresh(data: dict):
     skip_threshold_time = 3
     if time_remaining < skip_threshold_time:
         print("gotem")
-        skip_debounce_lock.acquire()
         # reset lock asyncrounously
         Thread(target = relock_debounce_lock_after_timeout, daemon = True).start()
         
@@ -64,6 +63,8 @@ def check_queue_refresh(data: dict):
         target_song_id = get_next_song_id(current_song_id, playlist_id) 
         video_player.refresh_player(target_song_id,playlist_id)
         print(target_song_id)
+    else: 
+        skip_debounce_lock.release()
 
 
 def on_update(data):
