@@ -1,7 +1,7 @@
 from ytmd_sdk import Events, YTMD, Parser
 from ytmd_sdk.parser import queue as ytmdqueue
 from time import sleep
-from threading import Lock
+from threading import Lock, Thread
 from time import time
 import json
 import os
@@ -11,38 +11,74 @@ import scripts.search_engine as search_engine
 import scripts.video_player as video_player
 
 lock = Lock()
+skip_debounce_lock = Lock()
 
+
+def relock_debounce_lock_after_timeout():
+    timeout = 5
+    sleep(timeout)
+    if skip_debounce_lock.locked():
+        skip_debounce_lock.release()
+            
 def get_lock():
-    return Lock
+    return lock
+
+def get_next_song_id(selected_song_id, playlist_id):
+    queue = search_engine.get_playlist_contents(playlist_id)
+    for i, song in enumerate(queue):
+        if song["videoId"] == selected_song_id:
+            if i == len(queue):
+                return queue[0][videoId]
+            else:
+                return queue[i+1]["videoId"]
+    return queue[0]["videoId"]
+
+def check_queue_refresh(data: dict):
+    if not data:
+        return
+    playlist_id = data["playlistId"]
+    if not playlist_id == search_engine.get_queue_playlist_id():
+        return
+
+    if skip_debounce_lock.locked():
+        print("skipped")
+        return
+
+    current_song_data = data["video"] 
+    playlist_data = data["player"]
+
+    song_duration = int(current_song_data["durationSeconds"])
+    song_progress = int(playlist_data["videoProgress"])
+    time_remaining = song_duration-song_progress
+
+    skip_threshold_time = 3
+    if time_remaining < skip_threshold_time:
+        print("gotem")
+        skip_debounce_lock.acquire()
+        # reset lock asyncrounously
+        Thread(target = relock_debounce_lock_after_timeout, daemon = True).start()
+        
+        current_song_id = current_song_data["id"]
+        queue = playlist_data["queue"]
+        queue_elements = queue["items"] 
+        target_song_id = get_next_song_id(current_song_id, playlist_id) 
+        video_player.refresh_player(target_song_id,playlist_id)
+        print(target_song_id)
 
 
 def on_update(data):
-    if not data:
+    if lock.locked():
         return
-
     with lock:
-        playlist_id = data["playlistId"]
-        if playlist_id == search_engine.get_queue_playlist_id():
-            current_song_data =data["video"] 
-            playlist_data = data["player"]
-
-            song_duration = int(current_song_data["durationSeconds"])
-            song_progress = int(playlist_data["videoProgress"])
-            time_remaining = song_duration-song_progress
-
-            skip_threshold_time = 3
-            if time_remaining < skip_threshold_time:
-                queue = playlist_data["queue"]
-                queue_elements = queue["items"] 
-                selected_index = int(queue["selectedItemIndex"])
-                target_song = queue_elements[selected_index+1]
-                target_song_id = target_song["videoId"]
-                video_player.refresh_player(target_song_id,playlist_id)
+        check_queue_refresh(data)
         try: 
             with open("temp/song_data_temp.json","w") as file:
                 json.dump(data, file, indent=4)
             os.replace("temp/song_data_temp.json", "temp/song_data.json")
+
         except (PermissionError, FileNotFoundError):
+            print("failed to refresh data")
+
             pass
 
 

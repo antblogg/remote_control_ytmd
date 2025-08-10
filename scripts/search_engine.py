@@ -36,6 +36,12 @@ def get_playlist(query):
         })
     return out
         
+def get_playlist_contents(playlist_id):
+    music = YTMusic()
+    playlist = music.get_playlist(playlist_id)
+    if isinstance(playlist, list):
+        playlist = playlist[0]
+    return playlist["tracks"]
 
 def get_album(query):
     music = YTMusic()
